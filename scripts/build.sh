@@ -2,6 +2,8 @@
 apt update
 apt install build-essential git autoconf libtool pkg-config libusb-1.0-0-dev libssl-dev checkinstall dh-make devscripts -y
 
+cd ~
+
 git clone -b rtu_usb https://github.com/networkupstools/libmodbus libmodbus-nut_1.0.0
 cd libmodbus-nut_1.0.0
 
