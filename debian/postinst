@@ -1,0 +1,33 @@
+#!/bin/bash
+set -e
+
+if [ "$1" = "configure" ]; then
+	echo "Running post-installation tasks..."
+	if ! getent passwd nut > /dev/null; then
+		adduser --system --no-create-home --group nut
+	fi
+
+	# Give nut user/group access to UPS USB
+	echo 'SUBSYSTEM=="usb", ATTR{idVendor}=="051d", ATTR{idProduct}=="0003", GROUP="nut", MODE="0660"' > /etc/udev/rules.d/99-usb-permissions.rules
+	udevadm control --reload-rules
+	udevadm trigger
+
+	for file in /etc/nut/*.sample; do mv "$file" "${file//.sample/}"; done
+
+	chmod -R 770 /etc/nut/
+	chown -R root:nut /etc/nut
+	
+	mkdir -p /var/state/ups
+	chmod 770 /var/state/ups
+	chown root:nut /var/state/ups
+
+	# Set NUT mode to standalone
+	sed -i 's/=none/=standalone/' /etc/nut/nut.conf
+
+	# Add UPS to ups.conf
+	echo -e '[myups]\n\tdriver = "apc_modbus"\n\tport = "auto"' >> /etc/nut/ups.conf
+fi
+
+#DEBHELPER#
+
+exit 0

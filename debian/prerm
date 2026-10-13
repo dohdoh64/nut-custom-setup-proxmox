@@ -1,0 +1,22 @@
+#!/bin/sh
+
+set -e
+
+case "$1" in 
+	remove|upgrade)
+		if [ $(ps aux | grep "[u]psd" | wc -l) = 1 ]; then
+			upsd -c stop
+		fi
+		if [ $(ps aux | grep "[u]psmon" | wc -l) = 1 ]; then
+			upsmon -c stop
+		fi
+		if [ $(upsdrvctl status | tail -n +3 | grep RUNNING | wc -l) = 1 ]; then 
+			upsdrvctl stop
+		fi
+		;;
+	*)
+esac
+
+#DEBHELPER#
+
+exit 0

@@ -1,0 +1,25 @@
+#!/bin/sh
+set -e
+
+if [ "$1" = "purge" ]; then
+	rm -rf /etc/nut/
+	
+	# Set group ownership back to root
+	echo 'SUBSYSTEM=="usb", ATTR{idVendor}=="051d", ATTR{idProduct}=="0003", GROUP="root", MODE="0660"' > /etc/udev/rules.d/99-usb-permissions.rules
+	udevadm control --reload-rules
+	udevadm trigger
+
+	rm -f /etc/udev/rules.d/99-usb-permissions.rules
+	udevadm control --reload-rules
+	udevadm trigger
+	
+	rm -rf /var/state/ups
+
+	if getent passwd nut > /dev/null; then
+		deluser --system --remove-all-files nut
+	fi
+fi
+
+#DEBHELPER#
+
+exit 0
